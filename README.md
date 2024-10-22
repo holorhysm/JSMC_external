@@ -1,0 +1,2 @@
+# JSMC_external
+JS_magic-circleに投げる用のJavaScript外部ファイル
