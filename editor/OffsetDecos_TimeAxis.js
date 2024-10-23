@@ -189,8 +189,8 @@ const toFixed = (num, digits, len) => num.toFixed(digits).padStart(len);
 const decorators = Function(`return ${input}`)();
 
 /** @desc - 各小節の開始位置が1小節目の開始位置から何拍後ろかを求める */
-/** @type {number} デコレータのendの最終小節 + 2(猶予) */
-const endBar = Math.max(...notes.map(d => d.end.when[0])) + 2;
+/** @type {number} ノーツの最終小節 + beatsAdd * 32(猶予) */
+const endBar = Math.max(...notes.map(d => d.when[0])) + beatsAdd * 32;
 /** @type {RationalNumber[]} i小節目の開始位置が1小節目の開始位置から何拍後ろか */
 const barOffset = [new RationalNumber(0, 1), new RationalNumber(0, 1) /*2小節目以降は↓のfor文で生成*/];
 for (let i = 1, j = new RationalNumber(0, 1); i < endBar; i++) {
