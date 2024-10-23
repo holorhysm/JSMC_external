@@ -190,7 +190,7 @@ const decorators = Function(`return ${input}`)();
 
 /** @desc - 各小節の開始位置が1小節目の開始位置から何拍後ろかを求める */
 /** @type {number} ノーツの最終小節 + beatsAdd * 32(猶予) */
-const endBar = Math.max(...notes.map(d => d.when[0])) + beatsAdd * 32;
+const endBar = Math.max(...decorators.map(d => d.when[0])) + beatsAdd * 32;
 /** @type {RationalNumber[]} i小節目の開始位置が1小節目の開始位置から何拍後ろか */
 const barOffset = [new RationalNumber(0, 1), new RationalNumber(0, 1) /*2小節目以降は↓のfor文で生成*/];
 for (let i = 1, j = new RationalNumber(0, 1); i < endBar; i++) {
@@ -201,7 +201,7 @@ for (let i = 1, j = new RationalNumber(0, 1); i < endBar; i++) {
 }
 
 /** @desc - 各デコレーターのstartとendのwhenを拍数換算してoffsetに代入 */
-notes.some(deco => {
+decorators.some(deco => {
     /** @type {!RationalNumber} - そのデコレーターの開始位置の1小節目の開始位置から何拍後ろか */
     deco.start.offset = barOffset[deco.start.when[0]].plus(RationalNumber.Div(new RationalNumber(deco.start.when[1], 1), new RationalNumber(deco.start.when[2], 4)));
     /** @type {!RationalNumber} - そのデコレーターの終了位置の1小節目の開始位置から何拍後ろか */
@@ -209,13 +209,13 @@ notes.some(deco => {
 });
 
 /** @desc - デコレーターのstartとendのoffsetを指定拍数ずらす */
-notes.some(deco => {
+decorators.some(deco => {
     deco.start.offset = deco.start.offset.plus(new RationalNumber(beatsAdd, 1));
     deco.end.offset = deco.end.offset.plus(new RationalNumber(beatsAdd, 1));
 });
 
 /** @desc - デコレーターのstartとendのwhenを再生成する */
-notes.some(deco => {
+decorators.some(deco => {
     /** @type {number} - そのデコレーターの開始位置の小節 */
     deco.start.when[0] = barOffset.findIndex(x => x.valueOf() > deco.start.offset.valueOf()) - 1;
     /** @type {RationalNumber} - そのデコレーターの開始位置の拍数 */
@@ -237,7 +237,7 @@ notes.some(deco => {
 /** @desc - デコレーターを出力 */
 // @ts-ignore - 諸事情でreturnなので許しを乞う
 return `[
-${notes.map(deco => `        {
+${decorators.map(deco => `        {
             "color": ${JSON.stringify(deco.color)},
             "start": { "where": [${toFixed(deco.start.where[0], 2, 5)}, ${toFixed(deco.start.where[1], 2, 5)}], "when": [${toFixed(deco.start.when[0], 0, 3)}, ${toFixed(deco.start.when[1], 0, 3)}, ${toFixed(deco.start.when[2], 0, 3)}], },
             "end":   { "where": [${toFixed(deco.end.where[0], 2, 5)}, ${toFixed(deco.end.where[1], 2, 5)}], "when": [${toFixed(deco.end.when[0], 0, 3)}, ${toFixed(deco.end.when[1], 0, 3)}, ${toFixed(deco.end.when[2], 0, 3)}], },
