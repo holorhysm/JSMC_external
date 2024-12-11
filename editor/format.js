@@ -80,7 +80,7 @@ const formatDeco = (deco) => {
     return `\
         {
             "color": ${JSON.stringify(deco.color)},
-            "start": { "where": [${padStart(round_2(deco.start.where[0]), 5)}, ${padStart(round_2(deco.start.where[1]), 5)}], "when": [[${padStart(round_z(deco.start.when[0]), 3)}, ${padStart(round_z(deco.start.when[1]), 3)}, ${padStart(round_z(deco.start.when[2]), 3)}], },
+            "start": { "where": [${padStart(round_2(deco.start.where[0]), 5)}, ${padStart(round_2(deco.start.where[1]), 5)}], "when": [${padStart(round_z(deco.start.when[0]), 3)}, ${padStart(round_z(deco.start.when[1]), 3)}, ${padStart(round_z(deco.start.when[2]), 3)}], },
             "end":   { "where": [${padStart(round_2(deco.end.where[0]), 5)}, ${padStart(round_2(deco.end.where[1]), 5)}], "when": [${padStart(round_z(deco.end.when[0]), 3)}, ${padStart(round_z(deco.end.when[1]), 3)}, ${padStart(round_z(deco.end.when[2]), 3)}], },
             "easing": { "left": ${format_Deco_Easing(deco.easing.left)}, "right": ${format_Deco_Easing(deco.easing.right)}, }, "speed": ${padStart(round_2(deco.speed), 7)},
         },`;
