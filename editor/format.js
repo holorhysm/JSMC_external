@@ -1,3 +1,8 @@
+/** ================================================================
+ * JSMC_external - editor/format.js
+ * copyright (c) 2024- Ayasaka-Koto, All rights reserved.
+================================================================= */
+
 /**
  * @typedef {Object} Holorhysm_ChartNote - 譜面ファイルのうち、1つのノーツを表すオブジェクト
  * @property {"push"|"hover"|"isolate"} type - ノーツの種類
