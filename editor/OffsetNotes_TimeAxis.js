@@ -12,7 +12,6 @@
  * @property {[number, number]} where - ノーツの[左端, 右端]の位置。-3〜3
  * @property {[number, number, number]} when - ノーツのタイミング。[小節, 分子, 分母]
  * @property {number} speed - ノーツの単体ソフラン倍率
- * @property {Q?} startAt - ノーツが1小節目の開始位置から何拍後にあるか
  */
 
 (async (input) => {

@@ -5,8 +5,6 @@
 
 //@ts-check
 
-import { Rational as Q } from "./rational.js";
-
 /**
  * 各小節の拍子を返す関数から、各小節が1小節目の開始位置から何拍後に始まるかを求めます
  * @param {(x: number) => [number, number]} barsFn - 小節番号xを下にがx小節目の拍子(m分のn拍子)を[n, m]で返す関数
