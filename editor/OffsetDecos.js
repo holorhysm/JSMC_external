@@ -21,18 +21,18 @@
     /** ======== inputをもとにデコレーターの配列を作る ======== */
     /** @type {Holorhysm_ChartDeco[]} */
     const decos = new Function(`"use strict"; return [${input}]`)();
-    /** ======== デコレーターのstart.when[0], 同[1], end.when[0], 同[1]をそれぞれ変換 ======== */
+    /** ======== デコレーターのstart.where[0], 同[1], end.where[0], 同[1]をそれぞれ変換 ======== */
     decos.forEach(deco => {
-        deco.start.when[0] = convert(deco.start.when[0]);
-        deco.start.when[1] = convert(deco.start.when[1]);
-        deco.end.when[0] = convert(deco.end.when[0]);
-        deco.end.when[1] = convert(deco.end.when[1]);
+        deco.start.where[0] = convert(deco.start.where[0]);
+        deco.start.where[1] = convert(deco.start.where[1]);
+        deco.end.where[0] = convert(deco.end.where[0]);
+        deco.end.where[1] = convert(deco.end.where[1]);
     });
-    /** ======== 傾きが負ならwhen[0]と[1]をそれぞれ入れ替える ======== */
+    /** ======== 傾きが負ならwhere[0]と[1]をそれぞれ入れ替える ======== */
     if (slope < 0) {
         decos.forEach(deco => {
-            [deco.start.when[0], deco.start.when[1]] = [deco.start.when[1], deco.start.when[0]];
-            [deco.end.when[0], deco.end.when[1]] = [deco.end.when[1], deco.end.when[0]];
+            [deco.start.where[0], deco.start.where[1]] = [deco.start.where[1], deco.start.where[0]];
+            [deco.end.where[0], deco.end.where[1]] = [deco.end.where[1], deco.end.where[0]];
         });
     }
     /** ======== デコレーターを整形して出力 ======== */
