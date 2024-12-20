@@ -49,4 +49,4 @@
     });
     /** @desc - notes[] を整形して出力 */
     return notes.map(note => formatNote(note)).join(",\n");
-})();
+})

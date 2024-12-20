@@ -26,8 +26,8 @@ const Rational = class {
         const N = BigInt(n);
         const D = BigInt(d);
         const g = gcd(N, D);
-        const sign = sign(N * D);
-        this.n = sign * abs(N) / g;
+        const s = sign(N * D);
+        this.n = s * abs(N) / g;
         this.d = abs(D) / g;
     }
     /** @type {() => number} - number変換 */
