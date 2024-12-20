@@ -48,5 +48,5 @@
         note.when = deaccumulateBeats(barsFn, note.startAt);
     });
     /** @desc - notes[] を整形して出力 */
-    return notes.map(note => formatNote(note)).join(",\n");
+    return notes.map(note => formatNote(note)).join("\n");
 })
