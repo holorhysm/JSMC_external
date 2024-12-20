@@ -15,37 +15,47 @@
  */
 
 (async (input) => {
-    /** @desc - 各種moduleをDynamic Import */
-    const moduleDirectory = "./"; // テスト中は"./"、本番では"https://……"に変更
-    const formatNote = await import(moduleDirectory + "format.js").then(module => module.formatNote);
-    const Q = await import(moduleDirectory + "rational.js").then(module => module.Rational);
-    const accumulateBeats = await import(moduleDirectory + "accumulation.js").then(module => module.accumulateBeats);
-    const deaccumulateBeats = await import(moduleDirectory + "accumulation.js").then(module => module.deaccumulateBeats);
-    // test
-    console.log(formatNote);
-    console.log(Q);
-    console.log(accumulateBeats);
-    console.log(deaccumulateBeats);
-    /** @desc - 入力文字列から Holorhysm_ChartNote[] を生成 */
+    /** ======== Module Dynamic Import ======== */
+    const urlParamsMap = new Map(new URLSearchParams(window.location.search));
+    const resolveRelativePath = (path) => URL.parse(path, urlParamsMap.get("file") ?? "https://cdn.jsdelivr.net/gh/holorhysm/JSMC_external@ab37e2d/editor/basis.js")?.toString() ?? "";
+    const formatNote = await import(resolveRelativePath("./format.js")).then(module => module.formatNote);
+    const { accumulation, distribution } = await import(resolveRelativePath("./accumulation.js"));
+    const Q = await import(resolveRelativePath("./calc_Q.js"));
+    /** ======== 譜面のbeats入力値を受け取ってbeatsFnを作る ======== */
+    /** @type {string?} prompt入力 : beats */
+    const prompt_beats = prompt("beatsを入力してください。", "[4, 4]") || "[4, 4]";
+    /** @type {(x: number) => [number, number]} beats */
+    // @ts-ignore : どうせなるので無視 1
+    const beats = new Function("x", `"use strict"; return (${prompt_beats});`);
+    /** ======== ずらす拍数を受け取る ======== */
+    /** @type {string?} prompt入力 : ずらす拍数 (整数ならn、分数ならn/m) */
+    const prompt_offset = prompt("何拍ずらす？(整数なら「4」、分数なら「1/2」のように入力)", "0");
+    /** @type {[number, number]} ずらす拍数([分子, 分母]) */
+    // @ts-ignore : どうせなるので無視 2
+    const offset = `${prompt_offset}/1`.split("/").map(x => Number(x)).slice(0, 2);
+    /** ======== inputをもとにノーツの配列を作る ======== */
     /** @type {Holorhysm_ChartNote[]} */
     const notes = new Function(`"use strict"; return [${input}]`)();
-    /** @desc - barsFnをprompt入力でもらう */
-    const barsFn = new Function(`"use strict"; return ${prompt(`譜面の beats の値を入力してください。("は含まない)`)}`);
-    /** @desc - notes[].startAtをwhenから生成 */
+    /** ======== 各ノーツに対してoffset処理 ======== */
     notes.forEach(note => {
-        note.startAt = accumulateBeats(barsFn, ...note.when);
+        /** ---- 各ノーツに notes[].acc (1小節目開始位置からの累積拍数)を作る ---- */
+        /** @type {[bigint, bigint]} - ノーツが存在する位置の1小節目開始位置からの累積拍数 */
+        // @ts-ignore : 本来はないけど一時的に作るので、一旦無視
+        note.acc = accumulation(beats, ...note.when);
+        /** ---- 各ノーツに notes[].acc_offset (ずらした後の累積拍数)を作る ---- */
+        /** @type {[bigint, bigint]} - ノーツが存在する位置の1小節目開始位置からの累積拍数 */
+        // @ts-ignore : 本来はないけど一時的に作るので、一旦無視
+        note.acc_offset = Q.add(note.acc[0], note.acc[1], BigInt(offset[0]), BigInt(offset[1]));
+        /** ---- 各ノーツの notes[].when を、notes[].acc_offsetから設定し直す ---- */
+        // @ts-ignore : acc_offsetは一時的に作られているので無視
+        const [bar, beatN, beatD] = distribution(beats, note.acc_offset);
+        note.when = [Number(bar), Number(beatN), Number(beatD)];
+        /** ---- 各ノーツの notes[].acc と notes[].acc_offset を削除 ---- */
+        // @ts-ignore : 一時的な変数なので削除
+        delete note.acc;
+        // @ts-ignore : 一時的な変数なので削除
+        delete note.acc_offset;
     });
-    /** @desc - notes[].startAtに加算する量をpromptでもらう(整数ならn、分数ならn/m形式) */
-    const offsetInput = prompt("ずらす拍数を入力してください。(整数なら「3」、分数なら「5/2」のように入力)");
-    const offset = new Q(...(`${offsetInput}/1`).split("/").map(x => BigInt(x))).div(new Q(4n));
-    /** @desc - notes[].startAtにoffsetを加算 */
-    notes.forEach(note => {
-        note.startAt = Q.add(note.startAt, offset);
-    });
-    /** @desc - notes[].whenをstartAtから生成 */
-    notes.forEach(note => {
-        note.when = deaccumulateBeats(barsFn, note.startAt);
-    });
-    /** @desc - notes[] を整形して出力 */
+    /** ======== ノーツを整形して出力 ======== */
     return notes.map(note => formatNote(note)).join("\n");
 })

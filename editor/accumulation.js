@@ -5,100 +5,69 @@
 
 //@ts-check
 
+/** @desc - 有理数([分子, 分母])の計算関連メソッドがcalc_Q.jsにあるので、それをimport */
+import * as Q from "./calc_Q.js";
+
 /**
- * 各小節の拍子を返す関数から、各小節が1小節目の開始位置から何拍後に始まるかを求めます
- * @param {(x: number) => [number, number]} barsFn - 小節番号xを下にがx小節目の拍子(m分のn拍子)を[n, m]で返す関数
- * @param {bigint} max - 最大小節数
- * @returns {Q[]} - 各小節が1小節目の開始位置から何拍後に始まるかを表す配列
+ * 各小節の拍子を返す関数 → i小節目の開始位置が1小節目開始位置から何拍後にあるか(配列)
+ * @param {(x: number) => [number, number]} beatsFn - 各小節の拍子を([分子, 分母]で)返す関数
+ * @param {number|bigint} [max=1000n] - 最大小節数
+ * @returns {[bigint, bigint][]} - i小節目の開始位置が1小節目開始位置から何拍後にあるか(配列)
  */
-const getBarStarts = (barsFn, max) => {
-    /** @type {Q[]} - 各小節が1小節目の開始位置から何拍後に始まるかを格納する配列 */
-    const barStarts = [];
-    /** @desc 0小節目・1小節目は0固定 */
-    barStarts.push(new Q(0n));
-    barStarts.push(new Q(0n));
-    /** @desc 2小節目以降はfor文で順番に足す */
-    for (let i = 2n; i <= BigInt(max); i += 1n) {
-        // 前の小節の拍子を取得
-        const [n, d] = barsFn(Number(i - 1n)).map(n => BigInt(n));
-        const prev = new Q(n, d);
-        // 前の小節の拍数を計算 ((拍子分子 / 拍子分母) × 4)
-        const prevBeats = prev.div(new Q(4n)).mul(new Q(4n));
-        // 前の小節の開始位置を取得
-        const prevStart = barStarts[Number(i - 1n)];
-        // 今の小節の開始位置を計算 (前の小節の開始位置 + 前の小節の拍数)
-        const start = prevStart.add(prevBeats);
-        // 今の小節の開始位置を格納
-        barStarts.push(start);
+const getBarsAcc = (beatsFn, max = 1000n) => {
+    /** @type {bigint} - 何小節目まで求めるか */
+    const terminate = BigInt(max);
+    /** @type {[bigint, bigint][]} - 各小節の開始位置が1小節目開始位置から何拍後にあるか */
+    // 0小節目・1小節目は0拍後とする
+    const acc = [[0n, 1n], [0n, 1n]];
+    // 2小節目以降の開始位置は1つずつ計算していく
+    for (let i = 1n; i < terminate; i++) {
+        // i+1小節目の開始位置は、i小節目の開始位置にi小節目の拍数を足したもの
+        const start_i = acc[Number(i)];
+        const beat_i = beatsFn(Number(i)).map(x => BigInt(x));
+        const start_i1 = Q.add(start_i[0], start_i[1], beat_i[0], beat_i[1]);
+        acc.push(start_i1);
     }
-    return barStarts;
+    return acc;
 };
 
 /**
- * 昇順で並んだ配列から、指定された値以下の最大の値のインデックスを二分探索で求めます
- * @param {Q[]} arr - 昇順で並んだ配列
- * @param {Q} value - 指定された値
- * @param {number} left - 配列の左端のインデックス
- * @param {number} right - 配列の右端のインデックス
- * @returns {number} - 指定された値以下の最大の値のインデックス
+ * 各小節の拍子を返す関数・ノーツがある小節・ノーツの小節内位置 → ノーツが1小節目開始位置から何拍後にあるか
+ * @param {(x: number) => [number, number]} beatsFn - 各小節の拍子を([分子, 分母]で)返す関数
+ * @param {number} bar - ノーツがある小節
+ * @param {number} beatN - ノーツの小節内位置の分子
+ * @param {number} beatD - ノーツの小節内位置の分母
+ * @returns {[bigint, bigint]} - ノーツが1小節目開始位置から何拍後にあるか([分子, 分母]で)
  */
-const binSearch = (arr, value, left, right) => {
-    if (left === right) {
-        return left;
-    }
-    const mid = Math.floor((left + right) / 2);
-    if (+arr[mid] <= +value) {
-        return binSearch(arr, value, mid + 1, right);
-    } else {
-        return binSearch(arr, value, left, mid);
-    }
+const accumulation = (beatsFn, bar, beatN, beatD) => {
+    /** @type {[bigint, bigint][]} - 各小節の開始位置が1小節目開始位置から何拍後にあるか */
+    const barsAcc = getBarsAcc(beatsFn, bar + 100);
+    /** @type {[bigint, bigint]} - ノーツがある小節が1小節目開始位置から何拍後にあるか */
+    const note_barStart = barsAcc[bar];
+    /** @type {[bigint, bigint]} - ノーツの位置が小節開始位置から何拍後にあるか */
+    const note_beat = [BigInt(beatN) * 4n, BigInt(beatD)];
+    /** @type {[bigint, bigint]} - ノーツが1小節目開始位置から何拍後にあるか */
+    const note_total = Q.add(note_barStart[0], note_barStart[1], note_beat[0], note_beat[1]);
+    return note_total;
 };
 
 /**
- * 各小節の拍子・ノーツがある小節・ノーツの小節内位置から、ノーツが1小節目の開始位置から何拍後にあるかを求めます
- * @param {(x: number) => [number, number]} barsFn - 小節番号xを下にがx小節目の拍子(m分のn拍子)を[n, m]で返す関数
- * @param {number} bar - ノーツがある小節の小節番号
- * @param {number} beats - ノーツの小節内位置 拍数
- * @param {number} basis - ノーツの小節内位置 拍子の分母
- * @returns {Q} - ノーツが1小節目の開始位置から何拍後にあるか
+ * 各小節の拍子を返す関数・ノーツが1小節目開始位置から何拍後にあるか → ノーツがある小節・ノーツの小節内位置
+ * @param {(x: number) => [number, number]} beatsFn - 各小節の拍子を([分子, 分母]で)返す関数
+ * @param {[bigint, bigint]} beats - ノーツが1小節目開始位置から何拍後にあるか([分子, 分母]で)
+ * @returns {[number, number, number]} - ノーツがある小節・ノーツの小節内位置([小節, 分子, 分母]で)
  */
-const accumulateBeats = (barsFn, bar, beats, basis) => {
-    /** @desc 最大小節数はbar+100か1000のうち大きい方 */
-    const maxBar = BigInt(Math.max(bar + 100, 1000));
-    /** @type {Q[]} - 各小節が1小節目の開始位置から何拍後に始まるかを格納する配列 */
-    const barStarts = getBarStarts(barsFn, maxBar);
-    /** @desc ==== ノーツが1小節目の開始位置から何拍後にあるかを求める ==== */
-    // ノーツがある小節の開始位置を取得
-    const note_barStart = barStarts[bar];
-    // ノーツがある小節の開始位置からノーツがある小節の位置までの拍数を計算 ((拍数分子 / 拍子分母) × 4)
-    const note_beatsInBar = new Q(beats, basis).mul(new Q(4n));
-    // ノーツが1小節目の開始位置から何拍後にあるかを計算 (ノーツがある小節の開始位置 + ノーツがある小節の位置までの拍数)
-    return note_barStart.add(note_beatsInBar);
+const distribution = (beatsFn, beats) => {
+    /** @type {[bigint, bigint][]} - 各小節の開始位置が1小節目開始位置から何拍後にあるか */
+    const barsAcc = getBarsAcc(beatsFn, 1000);
+    /** @type {bigint} - ノーツがある小節 (→ barsAcc[i] < beats を満たす最大のi) */
+    const bar = BigInt(barsAcc.findIndex(b => Q.sub(beats[0], beats[1], b[0], b[1])[0] < 0n) - 1);
+    /** @type {[bigint, bigint]} - ノーツがある小節が1小節目開始位置から何拍後にあるか (→ beats - barsAcc[bar]) */
+    const barStartBeats = Q.sub(beats[0], beats[1], barsAcc[Number(bar)][0], barsAcc[Number(bar)][1]);
+    /** @type {[bigint, bigint]} - ノーツの小節内位置 (拍数を4で割ればいい) */
+    const beat = Q.div(barStartBeats[0], barStartBeats[1], 4n, 1n);
+    return [Number(bar), Number(beat[0]), Number(beat[1])];
 };
 
-/**
- * ノーツが1小節目の開始位置から何拍後にあるかから、各小節の拍子・ノーツがある小節・ノーツの小節内位置を求めます
- * @param {(x: number) => [number, number]} barsFn - 小節番号xを下にがx小節目の拍子(m分のn拍子)を[n, m]で返す関数
- * @param {Q} accumulation - ノーツが1小節目の開始位置から何拍後にあるか
- * @returns {[number, number, number]} - ノーツがある小節の小節番号, ノーツの小節内位置 拍数, ノーツの小節内位置 拍子の分母
- */
-const deaccumulateBeats = (barsFn, accumulation) => {
-    /** @desc 最大小節数はaccumulation+100か1000のうち大きい方 */
-    const maxBar = BigInt(Math.max(+accumulation + 100, 1000));
-    /** @type {Q[]} - 各小節が1小節目の開始位置から何拍後に始まるかを格納する配列 */
-    const barStarts = getBarStarts(barsFn, maxBar);
-    /** @desc ==== ノーツがどこにあるかを求める (※１〜maxBarで二分探索) ==== */
-    const bar = binSearch(barStarts, accumulation, 0, barStarts.length - 1) - 1;
-    // ノーツがある小節の開始位置を取得
-    const note_barStart = barStarts[bar];
-    // ノーツがある小節の位置までの拍数を計算 (accumulation - ノーツがある小節の開始位置)
-    const note_beatsInBar = accumulation.sub(note_barStart);
-    // 拍数を分数表記に変換 (拍数 / 4)
-    const beats = note_beatsInBar.div(new Q(4n));
-    // 分母と分子を個別取得
-    const basis = beats.d;
-    const beatsNum = beats.n;
-    return [Number(bar), Number(beatsNum), Number(basis)];
-};
-
-export { accumulateBeats, deaccumulateBeats };
+/** @desc - export */
+export { accumulation, distribution };
