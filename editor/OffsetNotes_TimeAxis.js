@@ -31,7 +31,7 @@
     /** @type {Holorhysm_ChartNote[]} */
     const notes = new Function(`"use strict"; return [${input}]`)();
     /** @desc - barsFnをprompt入力でもらう */
-    const barsFn = new Function(`"use strict"; return ${prompt(`譜面の beats の値を入力してください。("は含まない)`)}`)();
+    const barsFn = new Function(`"use strict"; return ${prompt(`譜面の beats の値を入力してください。("は含まない)`)}`);
     /** @desc - notes[].startAtをwhenから生成 */
     notes.forEach(note => {
         note.startAt = accumulateBeats(barsFn, ...note.when);
