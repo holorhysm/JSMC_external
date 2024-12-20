@@ -1,5 +1,5 @@
 /** ================================================================
- * JSMC_external - editor/format.js
+ * JSMC_external - editor/format.js <Module>
  * copyright (c) 2024- Ayasaka-Koto, All rights reserved.
 ================================================================= */
 
