@@ -33,6 +33,8 @@
         }
     });
     /** ======== ノーツを整形して出力 ======== */
-    const formatNote = await import("./format.js").then(module => module.formatNote);
+    const urlParamsMap = new Map(new URLSearchParams(window.location.search));
+    const formatJS_URL = URL.parse("./format.js", urlParamsMap.get("file") ?? "https://cdn.jsdelivr.net/gh/holorhysm/JSMC_external@ab37e2d/editor/OffsetNotes.js")?.toString() ?? "";
+    const formatNote = await import(formatJS_URL).then(module => module.formatNote);
     return notes.map(note => formatNote(note)).join("\n");
 })
