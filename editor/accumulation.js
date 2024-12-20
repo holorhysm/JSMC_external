@@ -90,7 +90,7 @@ const deaccumulateBeats = (barsFn, accumulation) => {
     /** @type {Q[]} - 各小節が1小節目の開始位置から何拍後に始まるかを格納する配列 */
     const barStarts = getBarStarts(barsFn, maxBar);
     /** @desc ==== ノーツがどこにあるかを求める (※１〜maxBarで二分探索) ==== */
-    const bar = binSearch(barStarts, accumulation, 0, barStarts.length - 1);
+    const bar = binSearch(barStarts, accumulation, 0, barStarts.length - 1) - 1;
     // ノーツがある小節の開始位置を取得
     const note_barStart = barStarts[bar];
     // ノーツがある小節の位置までの拍数を計算 (accumulation - ノーツがある小節の開始位置)

@@ -38,7 +38,7 @@
     });
     /** @desc - notes[].startAtに加算する量をpromptでもらう(整数ならn、分数ならn/m形式) */
     const offsetInput = prompt("ずらす拍数を入力してください。(整数なら「3」、分数なら「5/2」のように入力)");
-    const offset = new Q(...(`${offsetInput}/1`).split("/").map(x => BigInt(x)));
+    const offset = new Q(...(`${offsetInput}/1`).split("/").map(x => BigInt(x))).div(new Q(4n));
     /** @desc - notes[].startAtにoffsetを加算 */
     notes.forEach(note => {
         note.startAt = Q.add(note.startAt, offset);

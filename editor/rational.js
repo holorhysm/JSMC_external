@@ -4,7 +4,7 @@
 ================================================================= */
 
 /** @type {(a: bigint, b: bigint) => bigint} - 最大公約数を求める */
-const gcd = (a, b) => (console.log(a, b), b === 0n ? a : a < b ? gcd(b, a) : gcd(b, a % b));
+const gcd = (a, b) => b === 0n ? a : a < b ? gcd(b, a) : gcd(b, a % b);
 
 /** @type {(x: bigint) => bigint} - 絶対値を求める */
 const abs = x => x < 0n ? -x : x;
