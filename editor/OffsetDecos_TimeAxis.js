@@ -56,9 +56,9 @@
         /** ---- 各ノーツに decos[].(start|end).acc_offset (ずらした後の累積拍数)を作る ---- */
         /** @type {[bigint, bigint]} - ノーツが存在する位置の1小節目開始位置からの累積拍数 */
         // @ts-ignore : 本来はないけど一時的に作るので、一旦無視
-        deco.start.acc_offset = Q.add(deco.acc[0], deco.acc[1], BigInt(offset[0]), BigInt(offset[1]));
+        deco.start.acc_offset = Q.add(deco.start.acc[0], deco.start.acc[1], BigInt(offset[0]), BigInt(offset[1]));
         // @ts-ignore : 本来はないけど一時的に作るので、一旦無視
-        deco.end.acc_offset = Q.add(deco.acc[0], deco.acc[1], BigInt(offset[0]), BigInt(offset[1]));
+        deco.end.acc_offset = Q.add(deco.end.acc[0], deco.end.acc[1], BigInt(offset[0]), BigInt(offset[1]));
         /** ---- 各ノーツの decos[].(start|end).when を、decos[].(start|end).acc_offsetから設定し直す ---- */
         // @ts-ignore : acc_offsetは一時的に作られているので無視
         const [start_bar, start_beatN, start_beatD] = distribution(beats, deco.start.acc_offset);
@@ -69,9 +69,11 @@
         /** ---- 各ノーツの decos[].(start|end).acc と decos[].(start|end).acc_offset を削除 ---- */
         // @ts-ignore : 一時的な変数なので削除
         delete deco.start.acc;
+        // @ts-ignore : 一時的な変数なので削除
         delete deco.end.acc;
         // @ts-ignore : 一時的な変数なので削除
         delete deco.start.acc_offset;
+        // @ts-ignore : 一時的な変数なので削除
         delete deco.end.acc_offset;
     });
     /** ======== ノーツを整形して出力 ======== */
