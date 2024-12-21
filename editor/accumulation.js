@@ -25,7 +25,7 @@ const getBarsAcc = (beatsFn, max = 1000n) => {
         // i+1小節目の開始位置は、i小節目の開始位置にi小節目の拍数を足したもの
         const start_i = acc[Number(i)];
         const beat_i = beatsFn(Number(i)).map(x => BigInt(x));
-        const start_i1 = Q.add(start_i[0], start_i[1], beat_i[0], beat_i[1]);
+        const start_i1 = Q.add(start_i[0], start_i[1], beat_i[0] * 4n, beat_i[1]);
         acc.push(start_i1);
     }
     return acc;
@@ -70,4 +70,4 @@ const distribution = (beatsFn, beats) => {
 };
 
 /** @desc - export */
-export { accumulation, distribution };
+export { getBarsAcc, accumulation, distribution };
