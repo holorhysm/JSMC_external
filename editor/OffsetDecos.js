@@ -37,7 +37,7 @@
     }
     /** ======== デコレーターを整形して出力 ======== */
     const urlParamsMap = new Map(new URLSearchParams(window.location.search));
-    const formatJS_URL = URL.parse("./format.js", urlParamsMap.get("file") ?? "https://cdn.jsdelivr.net/gh/holorhysm/JSMC_external@ab37e2d/editor/OffsetDecos.js")?.toString() ?? "";
+    const formatJS_URL = URL.parse("./format.js", urlParamsMap.get("file") ?? "https://cdn.jsdelivr.net/gh/holorhysm/JSMC_external@main/editor/OffsetDecos.js")?.toString() ?? "";
     const formatDeco = await import(formatJS_URL).then(module => module.formatDeco);
     return decos.map(deco => formatDeco(deco)).join("\n");
 })

@@ -9,7 +9,7 @@
 (async (input) => {
     /** ======== Module Dynamic Import ======== */
     const urlParamsMap = new Map(new URLSearchParams(window.location.search));
-    const resolveRelativePath = (path) => URL.parse(path, urlParamsMap.get("file") ?? "https://cdn.jsdelivr.net/gh/holorhysm/JSMC_external@243f2ac/editor/basis.js")?.toString() ?? "";
+    const resolveRelativePath = (path) => URL.parse(path, urlParamsMap.get("file") ?? "https://cdn.jsdelivr.net/gh/holorhysm/JSMC_external@main/editor/basis.js")?.toString() ?? "";
     const formatNote = await import(resolveRelativePath("./format.js")).then(module => module.formatNote);
     const { accumulation, accumulationTime, distribution, getBarsAccTime } = await import(resolveRelativePath("./accumulation.js"));
     // @ts-ignore : 無視
