@@ -39,5 +39,36 @@ const div = (a, b, c, d) => simplify(a * d, b * c);
 /** @type {(a: bigint, b: bigint) => number} - a/b を小数で返す */
 const toNumber = (a, b) => Number(a) / Number(b);
 
+/** @type {(a: number) => ({n: bigint, d:bigint})} - aの十分な近似値を表す、分母がなるべく小さい有理数(n/d)を生成する */
+const approximation = (a) => {
+    /** @description - aが0の場合 → 0/1を返す */
+    if (a === 0) return { "n": 0n, "d": 1n };
+    /** @description - aが負数の場合 → 絶対値の近似に-1を掛ける */
+    if (a < 0) return ((abs) => ({ "n": -1n * abs.n, "d": abs.d }))(approximation(-a));
+    /** @description - aが正数の場合(↑に当てはまらない場合) → 分母の候補を1から順番に試す */
+    /** @type {bigint} - 分母の最大値 */
+    const maxDenominator = BigInt(16 * 9 * 25 * 1001);
+    /** @type {{n: bigint, d: bigint}} - 現時点で返す値の候補 */
+    let result = { "n": 0n, "d": 1n };
+    /** @type {number} - resultとaの誤差 */
+    let error = Math.abs(a - Number(result.n) / Number(result.d));
+    /** @description - 分母を1から順番に試す */
+    for (let d = 1n; d < maxDenominator; d++) {
+        /** @type {number} - a/dを四捨五入した値を求める */
+        const n = Math.round(a * Number(d));
+        /** @description - n/dがaに十分近い(===で等価と判定される)場合 → n/dを返す */
+        if (n / Number(d) === a) {
+            return { "n": BigInt(n), "d": d };
+        }
+        /** @description - n/dとaの誤差が現時点での最小誤差より小さい場合 → resultとerrorを更新する */
+        if (Math.abs(a - n / Number(d)) < error) {
+            result = { "n": BigInt(n), "d": d };
+            error = Math.abs(a - Number(result.n) / Number(result.d));
+        }
+    }
+    /** @description - ===で等価と判定されるところまで誤差が縮まらなかったら現時点の最小誤差で返す */
+    return result;
+}
+
 /** @desc export */
-export { sign, abs_Q, abs_Z, gcd, simplify, add, sub, mul, div, toNumber };
+export { sign, abs_Q, abs_Z, gcd, simplify, add, sub, mul, div, toNumber, approximation };
