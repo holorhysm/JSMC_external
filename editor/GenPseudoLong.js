@@ -52,9 +52,9 @@
         const endAcc = accumulation(beatsFn, ...deco.end.when);
         /** 開始位置と終了位置の秒数も先に求めておく */
         /** @type {[bigint, bigint]} */
-        const startAccTime = accumulationTime(beatsFn, bpmFn, ...deco.start.when);
+        const startAccTime = accumulationTime(beatsFn, bpmFn, deco.start.when[0], deco.start.when[1], deco.start.when[2]);
         /** @type {[bigint, bigint]} */
-        const endAccTime = accumulationTime(beatsFn, bpmFn, ...deco.end.when);
+        const endAccTime = accumulationTime(beatsFn, bpmFn, deco.end.when[0], deco.end.when[1], deco.end.when[2]);
         /** 疑似ロングの生成間隔でループ */
         let nowAcc = startAcc; // 開始位置からスタート
         while (true) {
