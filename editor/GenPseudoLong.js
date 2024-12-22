@@ -63,7 +63,7 @@
             /** 終了位置を超えたら終了 */
             if (Q.ge(nowAcc[0], nowAcc[1], endAcc[0], endAcc[1])) break;
             /** 現在位置の時間を求める */
-            const nowAccTime = accumulationTime(beatsFn, bpmFn, distribution(beatsFn, nowAcc));
+            const nowAccTime = accumulationTime(beatsFn, bpmFn, ...distribution(beatsFn, nowAcc));
             /** 現在位置が開始位置〜終了位置に対してどの程度の割合の位置にあるかを計算 */
             const lengthTime = Q.sub(endAccTime[0], endAccTime[1], startAccTime[0], startAccTime[1]);
             const nowLengthTime = Q.sub(nowAccTime[0], nowAccTime[1], startAccTime[0], startAccTime[1]);
