@@ -61,7 +61,7 @@
             /** ステップを進める */
             nowAcc = Q.add(nowAcc[0], nowAcc[1], interval[0], interval[1]);
             /** 終了位置を超えたら終了 */
-            if (Q.ge(nowAcc[0], nowAcc[1], endAcc[0], endAcc[1])) break;
+            if (Q.gt(nowAcc[0], nowAcc[1], endAcc[0], endAcc[1])) break;
             /** 現在位置の時間を求める */
             const nowAccTime = accumulationTime(beatsFn, bpmFn, ...distribution(beatsFn, nowAcc));
             /** 現在位置が開始位置〜終了位置に対してどの程度の割合の位置にあるかを計算 */
@@ -70,8 +70,8 @@
             const ratio = Q.div(nowLengthTime[0], nowLengthTime[1], lengthTime[0], lengthTime[1]);
             const ratioNum = Q.toNumber(ratio[0], ratio[1]);
             /** ノーツを生成 */
-            const noteLeftRatio = Easing.convert(ratioNum, detectedEasings.left).filter(x => 0 <= x && x <= 1)[0];
-            const noteRightRatio = Easing.convert(ratioNum, detectedEasings.right).filter(x => 0 <= x && x <= 1)[0];
+            const noteLeftRatio = Easing.invert(ratioNum, detectedEasings.left).filter(x => 0 <= x && x <= 1)[0];
+            const noteRightRatio = Easing.invert(ratioNum, detectedEasings.right).filter(x => 0 <= x && x <= 1)[0];
             const noteLeftPos = deco.start.where[0] + (deco.end.where[0] - deco.start.where[0]) * noteLeftRatio;
             const noteRightPos = deco.start.where[1] + (deco.end.where[1] - deco.start.where[1]) * noteRightRatio;
             const note = formatNote({
