@@ -74,7 +74,7 @@
             const noteRightPos = Easing.convert(ratioNum, detectedEasings.right);
             const note = formatNote({
                 "type": "hover",
-                "where": [],
+                "where": [noteLeftPos, noteRightPos],
                 "when": distribution(beatsFn, nowAcc),
                 "speed": -1000,
                 "hidden": true,
