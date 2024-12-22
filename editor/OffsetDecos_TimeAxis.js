@@ -42,7 +42,7 @@
     /** @type {[number, number]} ずらす拍数([分子, 分母]) */
     // @ts-ignore : どうせなるので無視 2
     const offset = `${prompt_offset}/1`.split("/").map(x => Number(x)).slice(0, 2);
-    /** ======== inputをもとにノーツの配列を作る ======== */
+    /** ======== inputをもとにデコレーターの配列を作る ======== */
     /** @type {Holorhysm_ChartDeco[]} */
     const decos = new Function(`"use strict"; return [${input}]`)();
     /** ======== 各ノーツに対してoffset処理 ======== */

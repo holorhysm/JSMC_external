@@ -70,5 +70,18 @@ const approximation = (a) => {
     return result;
 }
 
+/** @type {(a: bigint, b: bigint, c: bigint, d: bigint) => boolean} - a/b = c/d なら true */
+const eq = (a, b, c, d) => a * d === b * c;
+/** @type {(a: bigint, b: bigint, c: bigint, d: bigint) => boolean} - a/b != c/d なら true */
+const ne = (a, b, c, d) => a * d !== b * c;
+/** @type {(a: bigint, b: bigint, c: bigint, d: bigint) => boolean} - a/b < c/d なら true */
+const lt = (a, b, c, d) => a * d < b * c;
+/** @type {(a: bigint, b: bigint, c: bigint, d: bigint) => boolean} - a/b <= c/d なら true */
+const le = (a, b, c, d) => a * d <= b * c;
+/** @type {(a: bigint, b: bigint, c: bigint, d: bigint) => boolean} - a/b > c/d なら true */
+const gt = (a, b, c, d) => a * d > b * c;
+/** @type {(a: bigint, b: bigint, c: bigint, d: bigint) => boolean} - a/b >= c/d なら true */
+const ge = (a, b, c, d) => a * d >= b * c;
+
 /** @desc export */
-export { sign, abs_Q, abs_Z, gcd, simplify, add, sub, mul, div, toNumber, approximation };
+export { sign, abs_Q, abs_Z, gcd, simplify, add, sub, mul, div, toNumber, approximation, eq, ne, lt, le, gt, ge };

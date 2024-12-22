@@ -61,7 +61,7 @@ const round_z = (n) => {
  * @returns {string} - ノーツを表す整形されたJSON文字列
  */
 const formatNote = (note) => {
-    return `        { "type": ${padStart(`"${note.type}"`, 9)}, "where": [${padStart(round_2(note.where[0]), 5)}, ${padStart(round_2(note.where[1]), 5)}], "when": [${padStart(round_z(note.when[0]), 3)}, ${padStart(round_z(note.when[1]), 3)}, ${padStart(round_z(note.when[2]), 3)}], "speed": ${padStart(round_2(note.speed), 7)}, },`;
+    return `        { "type": ${padStart(`"${note.type}"`, 9)}, "where": [${padStart(round_2(note.where[0]), 5)}, ${padStart(round_2(note.where[1]), 5)}], "when": [${padStart(round_z(note.when[0]), 3)}, ${padStart(round_z(note.when[1]), 3)}, ${padStart(round_z(note.when[2]), 3)}], "speed": ${padStart(round_2(note.speed), 7)}${note.hidden ? ", \"hidden\": true" : ""}, },`;
 };
 
 /**
