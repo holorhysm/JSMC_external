@@ -1,9 +1,95 @@
 /** ================================================================
- * JSMC_external
+ * JSMC_external - editor/GenPseudoLong.js <Script>
+ * 指定されたデコレーターのうち疑似ロングの条件を満たすものについて、擬似ロングの中間判定ノーツを生成します。
  * copyright (c) 2024- Ayasaka-Koto, All rights reserved.
 ================================================================= */
-let m = "Linear", n = "Sine", o = "Quad", p = "Cubic", q = "Quart", r = "Expo", s = "Circ", t = "_In", u = "_Out", v = "_InOut", _ = (e, a) => a <= 0 ? 0 : a >= 1 ? 1 : e == m + t ? a : e == m + u ? a : e == m + v ? a : e == n + t ? 2 * Math.acos(1 - a) / Math.PI : e == n + u ? 2 * Math.asin(a) / Math.PI : e == n + v ? Math.acos(1 - 2 * a) / Math.PI : e == o + t ? Math.sqrt(a) : e == o + u ? 1 - Math.sqrt(1 - a) : e == o + v ? a < .5 ? Math.sqrt(a / 2) : 1 - Math.sqrt(1 - 2 * a) / 2 : e == p + t ? Math.cbrt(a) : e == p + u ? 1 - Math.cbrt(1 - a) : e == p + v ? a < .5 ? Math.cbrt(a / 4) : 1 - Math.cbrt(1 - 2 * a) / 2 : e == q + t ? Math.sqrt(Math.sqrt(a)) : e == q + u ? 1 - Math.sqrt(Math.sqrt(1 - a)) : e == q + v ? a < .5 ? Math.sqrt(Math.sqrt(a / 8)) : 1 - Math.sqrt(Math.sqrt(1 - 2 * a)) / 2 : e == r + t ? Math.log2(a) / 10 + 1 : e == r + u ? 0 - Math.log2(1 - a) / 10 : e == r + v ? a < .5 ? Math.log2(2 * a) / 20 + .5 : .5 - Math.log2(2 - 2 * a) / 20 : e == s + t ? Math.sqrt(2 * a - a ** 2) : e == s + u ? 1 - Math.sqrt(1 - a ** 2) : e == s + v ? a < .5 ? Math.sqrt(a - a ** 2) : 1 - Math.sqrt(a - a ** 2) : a, w = window.prompt('譜面の beats の値を入力してください。("は含まない)'), x = "[", y = Function("return " + w), z = Function("return " + input)(), $ = [0, 0]; for (let i = 2; i < z.reduce((e, a) => a.end.when[0] > e.end.when[0] ? a : e).end.when[0] + 10; i++) { let [e, a] = y(i - 1); $[i] = $[i - 1] + 4 * e / a } z.forEach(e => {
-    x += "\n"; let a = $[e.start.when[0]] + 4 * e.start.when[1] / e.start.when[2], h = $[e.end.when[0]] + 4 * e.end.when[1] / e.end.when[2]; for (let d = Math.ceil(a * 4) / 4; d <= h; d += 1 / 4) {
-        let l = $.findIndex(e => e > d) - 1, c = d - $[l], g = (d - a) / (h - a), b = _(e.easing.left, g), I = e.start.where[0] + (e.end.where[0] - e.start.where[0]) * b, f; x += `        { "type":   "hover", "where": [${I.toFixed(2).padStart(5, " ")}, ${(e.start.where[1] + (e.end.where[1] - e.start.where[1]) * _(e.easing.right, g)).toFixed(2).padStart(5, " ")}], "when": [${("" + l).padStart(3, " ")},${(4 * c + "").padStart(3, " ")}, 16], "speed": 1.00, },
-`}
-}), x += "]"; return x;
+
+//@ts-check
+
+(async (input) => {
+    /** ======== Module Dynamic Import ======== */
+    const urlParamsMap = new Map(new URLSearchParams(window.location.search));
+    const resolveRelativePath = (path) => URL.parse(path, urlParamsMap.get("file") ?? "https://cdn.jsdelivr.net/gh/holorhysm/JSMC_external@main/editor/basis.js")?.toString() ?? "";
+    const formatNote = await import(resolveRelativePath("./format.js")).then(module => module.formatNote);
+    const { accumulation, accumulationTime, distribution, getBarsAccTime } = await import(resolveRelativePath("./accumulation.js"));
+    // @ts-ignore : 無視
+    const Easing = await import("https://cdn.jsdelivr.net/gh/AXT-AyaKoto/easing.js@v0.1.0/script.js").then(module => module.Easing);
+    const Q = await import(resolveRelativePath("./calc_Q.js"));
+    /** ======== 生成したノーツを入れておく配列を作っておく ======== */
+    /** @type {Holorhysm_ChartNote[]} */
+    const notes = [];
+    /** ======== 譜面のbeats・bpm入力値を受け取ってbeatsFn・bpmFnを作る ======== */
+    /** @type {string?} prompt入力 : beats */
+    const prompt_beats = prompt("beatsを入力してください。", "[4, 4]") || "[4, 4]";
+    /** @type {(x: number) => [number, number]} beats */
+    // @ts-ignore : どうせなるので無視 1
+    const beatsFn = new Function("x", `"use strict"; return (${prompt_beats});`);
+    /** @type {string?} prompt入力 : bpm */
+    const prompt_bpm = prompt("bpmを入力してください。", "120") || "120";
+    /** @type {(x: number) => number} bpm */
+    // @ts-ignore : どうせなるので無視 2
+    const bpmFn = new Function("x", `"use strict"; return (${prompt_bpm});`);
+    /** ======== 疑似ロングの生成間隔を訪ねておく ======== */
+    /** @type {string?} prompt入力 : 生成間隔 (何拍ごとにするか、で聞く) */
+    const prompt_interval = prompt("疑似ロングの生成間隔を入力してください。(1拍ごとなら「1」、0.5拍ごとなら「1/2」のように入力)", "1/4") || "1/4";
+    /** @type {[bigint, bigint]} 生成間隔([分子, 分母]) */
+    // @ts-ignore : どうせなるので無視 3
+    const interval = `${prompt_interval}/1`.split("/").map(x => BigInt(+x)).slice(0, 2);
+    /** ======== inputをもとにデコレーターの配列を作る ======== */
+    /** @type {Holorhysm_ChartDeco[]} */
+    const decos = new Function(`"use strict"; return [${input}]`)();
+    /** ======== 各デコレーターに対してoffset処理 ======== */
+    decos.forEach(deco => {
+        /** deco.colorに擬似ロングの条件を満たす色が指定されていなければ吹き飛ばす */
+        const pseudoLongCondition = /^((rgb|oklch)\(from )?pseudolong(.+\/ alpha\))?$/gi;
+        const isPseudoLong = pseudoLongCondition.test(String(deco.color));
+        if (!isPseudoLong) return;
+        /** 左右のイージング指定は先に取得しておく */
+        const detectedEasings = {
+            "left": deco.easing.left,
+            "right": deco.easing.right
+        };
+        /** 開始位置と終了位置の累積拍数を先に求めておく */
+        /** @type {[bigint, bigint]} */
+        const startAcc = accumulation(beatsFn, ...deco.start.when);
+        /** @type {[bigint, bigint]} */
+        const endAcc = accumulation(beatsFn, ...deco.end.when);
+        /** 開始位置と終了位置の秒数も先に求めておく */
+        /** @type {[bigint, bigint]} */
+        const startAccTime = accumulationTime(beatsFn, bpmFn, deco.start.when[0], deco.start.when[1], deco.start.when[2]);
+        /** @type {[bigint, bigint]} */
+        const endAccTime = accumulationTime(beatsFn, bpmFn, deco.end.when[0], deco.end.when[1], deco.end.when[2]);
+        /** 疑似ロングの生成間隔でループ */
+        let nowAcc = startAcc; // 開始位置からスタート
+        while (true) {
+            /** ステップを進める */
+            nowAcc = Q.add(nowAcc[0], nowAcc[1], interval[0], interval[1]);
+            /** 終了位置を超えたら終了 */
+            if (Q.gt(nowAcc[0], nowAcc[1], endAcc[0], endAcc[1])) break;
+            /** 現在位置の時間を求める */
+            const nowAccTime = accumulationTime(beatsFn, bpmFn, ...distribution(beatsFn, nowAcc));
+            /** 現在位置が開始位置〜終了位置に対してどの程度の割合の位置にあるかを計算 */
+            const lengthTime = Q.sub(endAccTime[0], endAccTime[1], startAccTime[0], startAccTime[1]);
+            const nowLengthTime = Q.sub(nowAccTime[0], nowAccTime[1], startAccTime[0], startAccTime[1]);
+            const ratio = Q.div(nowLengthTime[0], nowLengthTime[1], lengthTime[0], lengthTime[1]);
+            const ratioNum = Q.toNumber(ratio[0], ratio[1]);
+            /** ノーツを生成 */
+            const noteLeftRatio = Easing.invert(ratioNum, detectedEasings.left).filter(x => 0 <= x && x <= 1)[0];
+            const noteRightRatio = Easing.invert(ratioNum, detectedEasings.right).filter(x => 0 <= x && x <= 1)[0];
+            const noteLeftPos = deco.start.where[0] + (deco.end.where[0] - deco.start.where[0]) * noteLeftRatio;
+            const noteRightPos = deco.start.where[1] + (deco.end.where[1] - deco.start.where[1]) * noteRightRatio;
+            const note = formatNote({
+                "type": "hover",
+                "where": [noteLeftPos, noteRightPos],
+                "when": distribution(beatsFn, nowAcc),
+                "speed": -1000,
+                "hidden": true,
+            });
+            notes.push(note);
+        }
+    });
+    /** ======== 重複ノーツは同じ文字列になってるので吹き飛ばす ======== */
+    const uniqueNotes = Array.from(new Set(notes));
+    /** ======== ノーツを整形して出力 ======== */
+    return uniqueNotes.join("\n");
+})
