@@ -13,7 +13,7 @@
     const formatNote = await import(resolveRelativePath("./format.js")).then(module => module.formatNote);
     const { accumulation, accumulationTime, distribution, getBarsAccTime } = await import(resolveRelativePath("./accumulation.js"));
     // @ts-ignore : 無視
-    const Easing = await import("https://cdn.jsdelivr.net/gh/AXT-AyaKoto/easing.js@v0.1.0/script.js");
+    const Easing = await import("https://cdn.jsdelivr.net/gh/AXT-AyaKoto/easing.js@v0.1.0/script.js").then(module => module.Easing);
     const Q = await import(resolveRelativePath("./calc_Q.js"));
     /** ======== 生成したノーツを入れておく配列を作っておく ======== */
     /** @type {Holorhysm_ChartNote[]} */
@@ -70,8 +70,10 @@
             const ratio = Q.div(nowLengthTime[0], nowLengthTime[1], lengthTime[0], lengthTime[1]);
             const ratioNum = Q.toNumber(ratio[0], ratio[1]);
             /** ノーツを生成 */
-            const noteLeftPos = Easing.convert(ratioNum, detectedEasings.left);
-            const noteRightPos = Easing.convert(ratioNum, detectedEasings.right);
+            const noteLeftRatio = Easing.convert(ratioNum, detectedEasings.left).filter(x => 0 <= x && x <= 1)[0];
+            const noteRightRatio = Easing.convert(ratioNum, detectedEasings.right).filter(x => 0 <= x && x <= 1)[0];
+            const noteLeftPos = deco.start.where[0] + (deco.end.where[0] - deco.start.where[0]) * noteLeftRatio;
+            const noteRightPos = deco.start.where[1] + (deco.end.where[1] - deco.start.where[1]) * noteRightRatio;
             const note = formatNote({
                 "type": "hover",
                 "where": [noteLeftPos, noteRightPos],
