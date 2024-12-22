@@ -97,7 +97,7 @@ const accumulationTime = (beatsFn, tempoFn, bar, beatN, beatD) => {
     /** @type {[bigint, bigint]} - ノーツの位置が小節開始位置から何拍後にあるか */
     const note_beat = [BigInt(beatN) * 4n, BigInt(beatD)];
     /** @type {[bigint, bigint]} - ノーツの位置が小節開始位置から何秒後にあるか */
-    const note_beatTime = Q.div(60n * note_beat[0], note_beat[1], ...tempo);
+    const note_beatTime = Q.mul(60n * tempo[1], tempo[0], note_beat[0], note_beat[1]);
     /** @type {[bigint, bigint]} - ノーツが1小節目開始位置から何秒後にあるか */
     const note_total = Q.add(note_barStart[0], note_barStart[1], note_beatTime[0], note_beatTime[1]);
     return note_total;
