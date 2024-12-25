@@ -42,7 +42,9 @@
     decos.forEach(deco => {
         /** deco.colorに擬似ロングの条件を満たす色が指定されていなければ吹き飛ばす */
         const pseudoLongCondition = /^((rgb|oklch)\(from )?pseudolong(.+\/ alpha\))?$/gi;
-        const isPseudoLong = pseudoLongCondition.test(String(deco.color));
+        let isPseudoLong = false;
+        if (typeof deco.color === "string") isPseudoLong = pseudoLongCondition.test(deco.color);
+        else if (Array.isArray(deco.color)) isPseudoLong = deco.color.some(x => pseudoLongCondition.test(x[1]));
         if (!isPseudoLong) return;
         /** 左右のイージング指定は先に取得しておく */
         const detectedEasings = {
