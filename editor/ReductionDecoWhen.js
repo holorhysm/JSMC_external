@@ -1,7 +1,7 @@
 /** ================================================================
  * JSMC_external - editor/ReductionDecoWhen.js <Script>
  * 指定されたデコレーターのwhen[1]･when[2]を通分します
- * copyright (c) 2024- Ayasaka-Koto, All rights reserved.
+ * copyright (c) 2025- Ayasaka-Koto, All rights reserved.
 ================================================================= */
 
 //@ts-check
