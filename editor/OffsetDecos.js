@@ -28,11 +28,12 @@
         deco.end.where[0] = convert(deco.end.where[0]);
         deco.end.where[1] = convert(deco.end.where[1]);
     });
-    /** ======== 傾きが負ならwhere[0]と[1]をそれぞれ入れ替える ======== */
+    /** ======== 傾きが負ならwhere[0]と[1]・easing.leftとeasing.rightをそれぞれ入れ替える ======== */
     if (slope < 0) {
         decos.forEach(deco => {
             [deco.start.where[0], deco.start.where[1]] = [deco.start.where[1], deco.start.where[0]];
             [deco.end.where[0], deco.end.where[1]] = [deco.end.where[1], deco.end.where[0]];
+            [deco.easing.left, deco.easing.right] = [deco.easing.right, deco.easing.left];
         });
     }
     /** ======== デコレーターを整形して出力 ======== */
