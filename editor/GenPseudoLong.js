@@ -13,9 +13,10 @@
     const formatNote = await import(resolveRelativePath("./format.js")).then(module => module.formatNote);
     const { accumulation, accumulationTime, distribution, getBarsAccTime } = await import(resolveRelativePath("./accumulation.js"));
     // @ts-ignore : 無視
-    const Easing = await import("https://cdn.jsdelivr.net/gh/AXT-AyaKoto/easing.js@v0.1.0/script.js").then(module => module.Easing);
+    const Easing = await import("https://cdn.jsdelivr.net/gh/AXT-AyaKoto/easing.js@v0.2.0/script.js").then(module => module.Easing);
     const Q = await import(resolveRelativePath("./calc_Q.js"));
     /** ======== 生成したノーツを入れておく配列を作っておく ======== */
+    // @ts-ignore : 無視
     /** @type {Holorhysm_ChartNote[]} */
     const notes = [];
     /** ======== 譜面のbeats・bpm入力値を受け取ってbeatsFn・bpmFnを作る ======== */
@@ -76,8 +77,8 @@
             const ratio = Q.div(nowLengthTime[0], nowLengthTime[1], lengthTime[0], lengthTime[1]);
             const ratioNum = Q.toNumber(ratio[0], ratio[1]);
             /** ノーツを生成 */
-            const noteLeftRatio = Easing.invert(ratioNum, detectedEasings.left).filter(x => 0 <= x && x <= 1)[0];
-            const noteRightRatio = Easing.invert(ratioNum, detectedEasings.right).filter(x => 0 <= x && x <= 1)[0];
+            const noteLeftRatio = Easing.invert(ratioNum, detectedEasings.left);
+            const noteRightRatio = Easing.invert(ratioNum, detectedEasings.right);
             const noteLeftPos = deco.start.where[0] + (deco.end.where[0] - deco.start.where[0]) * noteLeftRatio;
             const noteRightPos = deco.start.where[1] + (deco.end.where[1] - deco.start.where[1]) * noteRightRatio;
             const note = formatNote({
