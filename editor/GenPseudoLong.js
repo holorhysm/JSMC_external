@@ -39,13 +39,30 @@
     /** ======== inputをもとにデコレーターの配列を作る ======== */
     /** @type {Holorhysm_ChartDeco[]} */
     const decos = new Function(`"use strict"; return [${input}]`)();
+    /** ======== 事前準備 ======== */
+    /** @type {(str: string) => number} - CSS<color>型文字列を解釈し、透明度を返す */
+    const getColorAlpha = (str) => {
+        const canvas = new OffscreenCanvas(1, 1);
+        /** @type {!CanvasRenderingContext2D} */
+        // @ts-ignore : どうせなるので無視 4
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = str;
+        ctx.fillRect(0, 0, 1, 1);
+        const data = ctx.getImageData(0, 0, 1, 1);
+        return data.data[3] / 255;
+    };
+    /** @type {(str: string) => boolean} - CSS<color>型文字列を解釈、疑似ロングかどうかを判定する */
+    const checkPseudoLong = (str) => {
+        const replaced = str.replace(/pseudolong/ig, "rgb(64 192 64 / 0.9)");
+        return Math.abs(getColorAlpha(replaced) - 0.9) < 1 / (255 * 2);
+    };
     /** ======== 各デコレーターに対してoffset処理 ======== */
     decos.forEach(deco => {
         /** deco.colorに擬似ロングの条件を満たす色が指定されていなければ吹き飛ばす */
         const pseudoLongCondition = /^((rgb|oklch)\(from )?pseudolong(.+\/ alpha\))?$/gi;
         let isPseudoLong = false;
-        if (typeof deco.color === "string") isPseudoLong = pseudoLongCondition.test(deco.color);
-        else if (Array.isArray(deco.color)) isPseudoLong = deco.color.some(x => pseudoLongCondition.test(x[1]));
+        if (typeof deco.color === "string") isPseudoLong = checkPseudoLong(deco.color);
+        else if (Array.isArray(deco.color)) isPseudoLong = deco.color.some(x => checkPseudoLong(x[1]));
         if (!isPseudoLong) return;
         /** 左右のイージング指定は先に取得しておく */
         const detectedEasings = {
